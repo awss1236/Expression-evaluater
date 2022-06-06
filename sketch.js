@@ -3,10 +3,7 @@ function token(type,value){
 	this.value=value
 }
 
-enum SymbolType{
-	num=0,
-	ope
-}
+const SymbolType={ope:0,num:1};
 
 function Eval(){
 	let inp=document.getElementById("Input"),
