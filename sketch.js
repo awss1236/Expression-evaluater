@@ -9,15 +9,22 @@ function Eval(){
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
-	console.log(Parse("10+5"))
+	console.log(Parse(inp.value))
 }
 
+function isNumber(char){
+	if(char.trim()==""){
+		//smthin is wrong !!!!!!!!!!!!!
+		return false
+	}
+	return !isNaN(char);
+}
 
 function Parse(expr){
 	let out=[]
 	let curnum=0
-	for(let i=0;i<expr.length){
-		if(expr.charAt(i).isNaN()){
+	for(let i=0;i<expr.length;i++){
+		if(!isNumber(expr.charAt(i))){
 			//not a number => operation
 			//push the previous number then the operation
 			out.push(new token(SymbolType.num,curnum))
@@ -34,6 +41,7 @@ function Parse(expr){
 			curnum=curnum*10+Number(expr.charAt(i))
 		}
 	}
+	out.push(new token(SymbolType.num,curnum))
 	return out
 }
 
