@@ -3,18 +3,25 @@ function token(type,value){
 	this.value=value
 }
 
-const SymbolType={ope:0,num:1};
+class node{
+	constructor(val){
+		this.value=val
+		this.left
+		this.right
+	}
+}
+
+const TokenType={operation:0,number:1,openparen:2,closeparen:3};
 
 function Eval(){
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
-	console.log(Lex(inp.value))
+	console.log(ShuntingYard(Lex(inp.value)))
 }
 
 function isNumber(char){
 	if(char.trim()==""){
-		//smthin is wrong !!!!!!!!!!!!!
 		return false
 	}
 	return !isNaN(char);
@@ -30,28 +37,70 @@ function Lex(expr){
 			//push the previous number then the operation
 			switch(expr.charAt(i)){
 				case "+":
-					out.push(new token(SymbolType.num,curnum))
-					out.push(new token(SymbolType.ope,"+"))
+					out.push(new token(TokenType.number,curnum))
+					out.push(new token(TokenType.operation,"+2"))
 					curnum=0
 					break
 				case "*":
-					out.push(new token(SymbolType.num,curnum))
-					out.push(new token(SymbolType.ope,"*"))
+					out.push(new token(TokenType.number,curnum))
+					out.push(new token(TokenType.operation,"*3"))
 					curnum=0
 					break
+				case "-":
+					out.push(new token(TokenType.number,curnum))
+					out.push(new token(TokenType.operation,"-2"))
+					curnum=0
+					break
+				case "/":
+					out.push(new token(TokenType.number,curnum))
+					out.push(new token(TokenType.operation,"/3"))
+					curnum=0
+					break
+				case "(":
+					out.push(new token(TokenType.number,curnum))
+					out.push(new token(TokenType.openparen,"¯\_(ツ)_/¯"))
+					curnum=0
+					break
+				case ")":
+					out.push(new token(TokenType.number,curnum))
+					out.push(new token(TokenType.closeparen,"¯\_(ツ)_/¯"))
+					curnum=0
+					break
+				
 			}
 		}else{
 			curnum=curnum*10+Number(expr.charAt(i))
 		}
 	}
-	out.push(new token(SymbolType.num,curnum))
+	out.push(new token(TokenType.number,curnum))
 	return out
 }
 
 function ShuntingYard(expr){
-	let stk1=[],
-		stk2=[]
+	let out=[],
+		opestack=[]
 
+	expr.forEach(token=>{
+		switch(token.type){
+			case TokenType.openparen:
+				opestack.push(token)
+				break
+			case TokenType.number:
+				out.push(token)
+				break
+			case TokenType.operation:
+				let lastope=opestack[opestack.length-1]
+				while(lastope&&token.value.charAt(1)<=lastope.value.charAt(1)){
+					out.push(opestack.pop())
+					lastope=opestack[opestack.length-1]
+				}
+				opestack.push(token)
+				break
+		}
+	})
+	let temp=opestack.length
+	for(let i=0;i<temp;i++){
+		out.push(opestack.pop())
+	}
+	return out
 }
-
-
