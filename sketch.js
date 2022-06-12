@@ -9,7 +9,7 @@ function Eval(){
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
-	console.log(Parse(inp.value))
+	console.log(Lex(inp.value))
 }
 
 function isNumber(char){
@@ -20,23 +20,26 @@ function isNumber(char){
 	return !isNaN(char);
 }
 
-function Parse(expr){
+function Lex(expr){
+	expr=expr.trim()
 	let out=[]
 	let curnum=0
 	for(let i=0;i<expr.length;i++){
 		if(!isNumber(expr.charAt(i))){
 			//not a number => operation
 			//push the previous number then the operation
-			out.push(new token(SymbolType.num,curnum))
 			switch(expr.charAt(i)){
 				case "+":
+					out.push(new token(SymbolType.num,curnum))
 					out.push(new token(SymbolType.ope,"+"))
+					curnum=0
 					break
 				case "*":
+					out.push(new token(SymbolType.num,curnum))
 					out.push(new token(SymbolType.ope,"*"))
+					curnum=0
 					break
 			}
-			curnum=0
 		}else{
 			curnum=curnum*10+Number(expr.charAt(i))
 		}
