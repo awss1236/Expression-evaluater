@@ -4,7 +4,7 @@ function token(type,value){
 }
 
 
-class node{
+class TreeNode{
 	constructor(val){
 		this.value=val
 		this.left
@@ -18,7 +18,7 @@ function Eval(){
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
-	console.log(InfixToPrefix(Lex(inp.value)))
+	console.log(ConstructTree(InfixToPrefix(Lex(inp.value))))
 }
 
 function isNumber(char){
@@ -113,11 +113,11 @@ function InfixToPrefix(expr_){
 	return out.reverse()
 }
 
-function ConstructTree(expr_){
-	//accepts shunting yarded expression
-	let expr=expr_.copy().reverse()
-
-}
-function ConstructTree_(expr){
-
+function ConstructTree(expr){
+	let out=new TreeNode(expr.shift())
+	if(out.value.type==TokenType.operation){
+		out.left=ConstructTree(expr)
+		out.right=ConstructTree(expr)
+	}
+	return out
 }
