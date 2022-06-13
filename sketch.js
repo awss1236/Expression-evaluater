@@ -3,6 +3,7 @@ function token(type,value){
 	this.value=value
 }
 
+
 class node{
 	constructor(val){
 		this.value=val
@@ -17,7 +18,7 @@ function Eval(){
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
-	console.log(ShuntingYard(Lex(inp.value)))
+	console.log(InfixToPrefix(Lex(inp.value)))
 }
 
 function isNumber(char){
@@ -103,4 +104,20 @@ function ShuntingYard(expr){
 		out.push(opestack.pop())
 	}
 	return out
+}
+
+function InfixToPrefix(expr_){
+	let expr=expr_.slice()
+	expr.reverse()
+	let out=ShuntingYard(expr)
+	return out.reverse()
+}
+
+function ConstructTree(expr_){
+	//accepts shunting yarded expression
+	let expr=expr_.copy().reverse()
+
+}
+function ConstructTree_(expr){
+
 }
