@@ -18,7 +18,8 @@ function Eval(){
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
-	console.log(ConstructTree(InfixToPrefix(Lex(inp.value))))
+	let root=ConstructTree(InfixToPrefix(Lex(inp.value)))
+	out.innerHTML=GenVisCode(root)
 }
 
 function isNumber(char){
@@ -86,9 +87,13 @@ function ShuntingYard(expr){
 			case TokenType.openparen:
 				opestack.push(token)
 				break
+
+
 			case TokenType.number:
 				out.push(token)
 				break
+
+
 			case TokenType.operation:
 				let lastope=opestack[opestack.length-1]
 				while(lastope&&token.value.charAt(1)<=lastope.value.charAt(1)){
@@ -96,6 +101,17 @@ function ShuntingYard(expr){
 					lastope=opestack[opestack.length-1]
 				}
 				opestack.push(token)
+				break
+
+
+			case TokenType.closeparen:
+				let lastope=opestack[opestack.length-1]
+				while(lastope.type!=TokenType.openparen){
+					out.push(opestack.pop())
+					lastope=opestack[opestack.length-1]
+				}
+				opestack.pop()
+				out.push(opestack.pop())
 				break
 		}
 	})
@@ -109,6 +125,13 @@ function ShuntingYard(expr){
 function InfixToPrefix(expr_){
 	let expr=expr_.slice()
 	expr.reverse()
+	expr.forEach(token=>{
+		if(token.type==TokenType.openparen){
+			token.type=TokenType.closeparen
+		}else if(token.type==TokenType.closeparen){
+			token.type=openparen
+		}
+	})
 	let out=ShuntingYard(expr)
 	return out.reverse()
 }
@@ -118,6 +141,24 @@ function ConstructTree(expr){
 	if(out.value.type==TokenType.operation){
 		out.left=ConstructTree(expr)
 		out.right=ConstructTree(expr)
+	}
+	return out
+}
+function GenVisCode(root){
+	let out=""
+	if(root.left){
+		out+=root.value.value
+		out+=" "
+		out+=root.left.value.value
+		out+="<br>"
+		out+=GenVisCode(root.left)
+		if(root.right){
+			out+=root.value.value
+			out+=" "
+			out+=root.right.value.value
+			out+="<br>"
+			out+=GenVisCode(root.right)
+		}
 	}
 	return out
 }
