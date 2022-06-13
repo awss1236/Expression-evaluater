@@ -1,14 +1,19 @@
-function token(type,value){
+function Token(type,value){
 	this.type=type
 	this.value=value
 }
-
+let NodeID=0
 
 class TreeNode{
 	constructor(val){
 		this.value=val
 		this.left
 		this.right
+		this.id
+		if(val.type==TokenType.operation)
+			this.id=String(val.value).charAt(0)+"_"+NodeID++
+		else
+			this.id=val.value+"_"+NodeID++
 	}
 }
 
@@ -18,6 +23,11 @@ function Eval(){
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
+	if(inp.value==""){
+		out.innerHTML="Err:Empty expression"
+		return
+	}
+	console.log(InfixToPrefix(Lex(inp.value)))
 	let root=ConstructTree(InfixToPrefix(Lex(inp.value)))
 	out.innerHTML=GenVisCode(root)
 }
@@ -31,87 +41,88 @@ function isNumber(char){
 
 function Lex(expr){
 	expr=expr.trim()
-	let out=[]
-	let curnum=0
-	for(let i=0;i<expr.length;i++){
-		if(!isNumber(expr.charAt(i))){
-			//not a number => operation
-			//push the previous number then the operation
-			switch(expr.charAt(i)){
+	let out=[],
+		CurIndex=0
+	while(CurIndex<expr.length){
+		let CurChar=expr.charAt(CurIndex)
+		if(isNumber(CurChar)){
+			let num=0
+			while(isNumber(CurChar)){
+				num=num*10+Number(CurChar)
+				CurIndex++
+				CurChar=expr.charAt(CurIndex)
+			}
+			out.push(new Token(TokenType.number,num))
+		}else{
+			switch(CurChar){
 				case "+":
-					out.push(new token(TokenType.number,curnum))
-					out.push(new token(TokenType.operation,"+2"))
-					curnum=0
-					break
-				case "*":
-					out.push(new token(TokenType.number,curnum))
-					out.push(new token(TokenType.operation,"*3"))
-					curnum=0
+					out.push(new Token(TokenType.operation,"+2"))
 					break
 				case "-":
-					out.push(new token(TokenType.number,curnum))
-					out.push(new token(TokenType.operation,"-2"))
-					curnum=0
+					out.push(new Token(TokenType.operation,"-2"))
+					break
+				case "*":
+					out.push(new Token(TokenType.operation,"*3"))
 					break
 				case "/":
-					out.push(new token(TokenType.number,curnum))
-					out.push(new token(TokenType.operation,"/3"))
-					curnum=0
+					out.push(new Token(TokenType.operation,"/3"))
 					break
 				case "(":
-					out.push(new token(TokenType.number,curnum))
-					out.push(new token(TokenType.openparen,"¯\_(ツ)_/¯"))
-					curnum=0
+					out.push(new Token(TokenType.openparen, "¯\\_(ツ)_/¯"))
 					break
 				case ")":
-					out.push(new token(TokenType.number,curnum))
-					out.push(new token(TokenType.closeparen,"¯\_(ツ)_/¯"))
-					curnum=0
+					out.push(new Token(TokenType.closeparen,"¯\\_(ツ)_/¯"))
 					break
-				
 			}
-		}else{
-			curnum=curnum*10+Number(expr.charAt(i))
+			CurIndex++
 		}
 	}
-	out.push(new token(TokenType.number,curnum))
 	return out
 }
 
 function ShuntingYard(expr){
 	let out=[],
 		opestack=[]
-
-	expr.forEach(token=>{
-		switch(token.type){
+	let lastope
+	expr.forEach(Token=>{
+		/*console.log("curToken:")
+		console.log(Token)
+		console.log("outstack:")
+		console.log(out.slice())
+		console.log("opestack:")
+		console.log(opestack.slice())
+		console.log("-------------------------------------")*/
+		switch(Token.type){
 			case TokenType.openparen:
-				opestack.push(token)
+				opestack.push(Token)
 				break
 
 
 			case TokenType.number:
-				out.push(token)
+				out.push(Token)
 				break
 
 
 			case TokenType.operation:
-				let lastope=opestack[opestack.length-1]
-				while(lastope&&token.value.charAt(1)<=lastope.value.charAt(1)){
+				lastope=opestack[opestack.length-1]
+				while(lastope&&lastope.type==TokenType.operation&&Token.value.charAt(1)<=lastope.value.charAt(1)){
 					out.push(opestack.pop())
 					lastope=opestack[opestack.length-1]
 				}
-				opestack.push(token)
+				opestack.push(Token)
 				break
 
 
 			case TokenType.closeparen:
-				let lastope=opestack[opestack.length-1]
+				lastope=opestack[opestack.length-1]
 				while(lastope.type!=TokenType.openparen){
 					out.push(opestack.pop())
 					lastope=opestack[opestack.length-1]
 				}
 				opestack.pop()
-				out.push(opestack.pop())
+				let next=opestack.pop()
+				if(next)
+					out.push(next)
 				break
 		}
 	})
@@ -125,11 +136,11 @@ function ShuntingYard(expr){
 function InfixToPrefix(expr_){
 	let expr=expr_.slice()
 	expr.reverse()
-	expr.forEach(token=>{
-		if(token.type==TokenType.openparen){
-			token.type=TokenType.closeparen
-		}else if(token.type==TokenType.closeparen){
-			token.type=openparen
+	expr.forEach(Token=>{
+		if(Token.type==TokenType.openparen){
+			Token.type=TokenType.closeparen
+		}else if(Token.type==TokenType.closeparen){
+			Token.type=TokenType.openparen
 		}
 	})
 	let out=ShuntingYard(expr)
@@ -147,15 +158,15 @@ function ConstructTree(expr){
 function GenVisCode(root){
 	let out=""
 	if(root.left){
-		out+=root.value.value
+		out+=root.id
 		out+=" "
-		out+=root.left.value.value
+		out+=root.left.id
 		out+="<br>"
 		out+=GenVisCode(root.left)
 		if(root.right){
-			out+=root.value.value
+			out+=root.id
 			out+=" "
-			out+=root.right.value.value
+			out+=root.right.id
 			out+="<br>"
 			out+=GenVisCode(root.right)
 		}
