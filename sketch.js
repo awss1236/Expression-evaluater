@@ -20,6 +20,7 @@ class TreeNode{
 const TokenType={operation:0,number:1,openparen:2,closeparen:3};
 
 function Eval(){
+	NodeID=0
 	let inp=document.getElementById("Input"),
 		out=document.getElementById("Output")
 	console.log('Evaluating ...')
@@ -27,7 +28,6 @@ function Eval(){
 		out.innerHTML="Err:Empty expression"
 		return
 	}
-	console.log(InfixToPrefix(Lex(inp.value)))
 	let root=ConstructTree(InfixToPrefix(Lex(inp.value)))
 	out.innerHTML=GenVisCode(root)
 }
@@ -85,13 +85,6 @@ function ShuntingYard(expr){
 		opestack=[]
 	let lastope
 	expr.forEach(Token=>{
-		/*console.log("curToken:")
-		console.log(Token)
-		console.log("outstack:")
-		console.log(out.slice())
-		console.log("opestack:")
-		console.log(opestack.slice())
-		console.log("-------------------------------------")*/
 		switch(Token.type){
 			case TokenType.openparen:
 				opestack.push(Token)
