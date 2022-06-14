@@ -15,6 +15,26 @@ class TreeNode{
 		else
 			this.id=val.value+"_"+NodeID++
 	}
+	Evaluate(){
+		if(this.value.type==TokenType.number){
+			return this.value.value
+		}else{
+			switch(this.value.value){
+				case "+2":
+					return this.left.Evaluate()+this.right.Evaluate()
+					break
+				case "-2":
+					return this.left.Evaluate()-this.right.Evaluate()
+					break
+				case "*3":
+					return this.left.Evaluate()*this.right.Evaluate()
+					break
+				case "/3":
+					return this.left.Evaluate()/this.right.Evaluate()
+					break
+			}
+		}
+	}
 }
 
 const TokenType={operation:0,number:1,openparen:2,closeparen:3};
@@ -29,7 +49,9 @@ function Eval(){
 		return
 	}
 	let root=ConstructTree(InfixToPrefix(Lex(inp.value)))
-	out.innerHTML=GenVisCode(root)
+	out.innerHTML=root.Evaluate()
+	out.innerHTML+="<br>-----------------------------------------------------------<br>"
+	out.innerHTML+=GenVisCode(root)
 }
 
 function isNumber(char){
